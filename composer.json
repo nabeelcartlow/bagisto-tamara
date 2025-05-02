@@ -1,0 +1,40 @@
+{
+    "name": "nabeelcartlow/bagisto-tamara",
+    "description": "Tamara Payment Method for Bagisto",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+      "bagisto",
+      "laravel",
+      "tamara",
+      "payment-methods",
+      "bagisto-payment-methods"
+    ],
+    "authors": [
+      {
+        "name": "Nabeel Afzal",
+        "email": "nabeel.afzal@cartlow.com"
+      }
+    ],
+    "homepage": "https://github.com/nabeelcartlow/bagisto-tamara",
+    "require": {
+    },
+    "autoload": {
+      "psr-4": {
+        "Bagisto\\Tamara\\": "src/"
+      }
+    },
+    "extra": {
+      "laravel": {
+        "providers": [
+          "Bagisto\\Tamara\\Providers\\TamaraServiceProvider"
+        ]
+      }
+    },
+    "config": {
+      "sort-packages": true
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+  }
+  
