@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddColumnToOrdersTable extends Migration
+class AddTamaraRelatedColumnToOrdersTable extends Migration
 {
     /**
      * Run the migrations.
@@ -14,7 +14,8 @@ class AddColumnToOrdersTable extends Migration
     public function up()
     {
         Schema::table('orders', function (Blueprint $table) {
-            $table->string('tamara-order-id', 100)->nullable();
+            $table->string('tamara-order-id', 40)->nullable();
+            $table->string('tamara-checkout-id', 40)->nullable();
         });
     }
 
@@ -26,7 +27,7 @@ class AddColumnToOrdersTable extends Migration
     public function down()
     {
         Schema::table('orders', function (Blueprint $table) {
-            $table->dropColumn('tamara-order-id');
+            $table->dropColumn(['tamara-order-id', 'tamara-checkout-id']);
         });
     }
 }
