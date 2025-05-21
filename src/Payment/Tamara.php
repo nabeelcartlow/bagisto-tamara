@@ -73,6 +73,13 @@ class Tamara extends Payment
         return $this->sdkRequest("/payments/capture", "POST", $payload);
     }
 
+    public function cancelOrder($orderId, $order) {
+        $payload = $this->getPayload($order);
+        $payload['order_id'] = $orderId;
+
+        return $this->sdkRequest("/orders/{$orderId}/cancel", "POST", $payload);
+    }
+
     private function sdkRequest(string $endpoint, string $method = 'POST', ?array $data = null): array
     {
         $url = rtrim($this->baseUrl, '/') . $endpoint;

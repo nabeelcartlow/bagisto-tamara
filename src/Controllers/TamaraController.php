@@ -110,8 +110,65 @@ class TamaraController extends Controller
 
     public function webhook(Request $request)
     {
-        Log::debug("Tamara Webhook", $request->all());
-        // TODO: Implement Webhook Logic
+        $payloadData = $request->all();
+        try {
+            if (!isset($payloadData['event_type']) || !isset($payloadData['order_id'])) {
+                return response()->json([
+                    'status' => 'success'
+                ]);
+            }
+            $paymentStatus = $payloadData['event_type'];
+            $orderId       = $payloadData['order_id'];
+            $order         = $this->orderRepository->findOneWhere([
+                'tamara_order_id' => $orderId,
+            ]);
+            
+            if ($order && $order->status != "pending") {
+                return response()->json([
+                    'status' => 'success'
+                ]);
+            }
+            switch ($paymentStatus) {
+                case 'order_approved':
+                    if ($this->client->authorizeOrder($orderId)) {
+                        $response = $this->client->captureOrder($orderId, $order);
+                        if (isset($response['status']) && in_array($response['status'], ['fully_captured', 'partially_captured'])) {
+                            $this->orderRepository->update(['status' => 'processing'], $order->id);
+
+                            if ($order->canInvoice()) {
+                                $this->invoiceRepository->create($this->prepareInvoiceData($order));
+                            }
+
+                            Cart::deActivateCart();
+                            return response()->json([
+                                'status' => 'success'
+                            ]);
+                        }
+                    }
+                    break;
+                case 'order_expired':
+                case 'order_declined':
+                case 'order_canceled':
+                    $this->client->cancelOrder($orderId, $order);
+                    break;
+                default:
+                    Log::error("Tamara Webhook Start");
+                    Log::debug(print_r($payloadData, true));
+                    Log::error("Tamara Webhook End");
+                    break;
+            }
+            return response()->json([
+                'status' => 'success'
+            ]);
+        } catch (\Exception $ex) {
+            Log::debug("Tamara Webhook Error Message : " . $ex->getMessage());
+            Log::debug(print_r($payloadData, true));
+            Log::debug("Tamara Webhook Error Trace : " . $ex->getTraceAsString());
+            return response()->json([
+                'status' => 'failure',
+                'message' => 'Something went wrong',
+            ]);
+        }
     }
 
     protected function validateOrder(): void
